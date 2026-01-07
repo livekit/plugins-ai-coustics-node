@@ -111,13 +111,13 @@ async function downloadLib(
   }
 }
 
-if (require.main === module) {
+if (require.main === module && process.env.SKIP_DOWNLOAD_LIB !== "true") {
   const options: ParseArgsOptionsConfig = {
     platform: { type: "string", default: targetPlatform() },
     arch: { type: "string", default: targetArch() },
     version: { type: "string", default: PACKAGE_VERSION },
     output: { type: "string", default: OUTPUT_DIR_PATH },
-    skip: { type: "boolean", short: "s", default: false },
+    "skip-if-exists": { type: "boolean", short: "s", default: false },
   };
   const { values } = parseArgs({ args: process.argv.slice(2), options });
   downloadLib(
@@ -125,6 +125,6 @@ if (require.main === module) {
     values.arch,
     values.version,
     values.output,
-    values.skip,
+    values["skip-if-exists"],
   );
 }

@@ -15,7 +15,7 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "ts:check": "tsc --noEmit",
-    "postinstall": "tsx download-lib.ts --skip"
+    "postinstall": "tsx download-lib.ts --skip-if-exists"
   },
   "engines": {
     "node": ">= 18"
