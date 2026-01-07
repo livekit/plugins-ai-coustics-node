@@ -9,7 +9,7 @@ import fetch from "node-fetch";
 const PACKAGE_NAME = "audio_filter_uniffi";
 const PACKAGE_VERSION = "0.1.1";
 const DOWNLOAD_BASE_URL =
-  "https://github.com/livekit/example/releases/download/example/build";
+  "https://github.com/livekit/plugins-ai-coustics-node/releases/download";
 const OUTPUT_DIR_PATH = resolve("dist/");
 
 type TargetPlatform = ReturnType<typeof targetPlatform>;
@@ -47,11 +47,11 @@ function targetArch() {
 
 function generateLibraryName(platform: TargetPlatform) {
   switch (platform) {
-    case "windows":
+    case "pc-windows-msvc":
       return `${PACKAGE_NAME}.dll`;
-    case "macos":
+    case "apple-darwin":
       return `lib${PACKAGE_NAME}.dylib`;
-    case "linux":
+    case "unknown-linux-gnu":
       return `lib${PACKAGE_NAME}.so`;
   }
 }
@@ -61,9 +61,9 @@ function generateLibraryDownloadUrl(
   arch: TargetArch,
   version: string,
 ) {
-  // ie, https://github.com/livekit/rust-sdks/releases/download/rust-sdks/livekit-ffi@0.12.40/ffi-android-arm64.zip
+  // ie, https://github.com/livekit/plugins-ai-coustics-node/releases/download/v0.1.1/build-aarch64-apple-darwin.zip
   const filename = `build-${arch}-${platform}.zip`;
-  return `${DOWNLOAD_BASE_URL}@${version}/${filename}`;
+  return `${DOWNLOAD_BASE_URL}/v${version}/${filename}`;
 }
 
 async function doesFileExist(path: string) {
