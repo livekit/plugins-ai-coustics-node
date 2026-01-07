@@ -1,6 +1,6 @@
 {
   "name": "@livekit/plugins-ai-coustics",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
@@ -25,17 +25,17 @@
     "ref-napi": "^3.0.3",
     "uniffi-bindgen-react-native": "^0.29.3-1",
     "pino": "^9.0.0",
-    "pino-pretty": "^13.0.0"
+    "pino-pretty": "^13.0.0",
+    "node-fetch": "3.3.2",
+    "unzipper": "0.10.11",
+    "@types/unzipper": "0.10.11",
+    "tsx": "4.21.0"
   },
   "devDependencies": {
     "@types/node": "^18",
     "@types/ref-napi": "^3.0.12",
     "tsup": "^8.4.0",
-    "typescript": "5.9.3",
-    "node-fetch": "3.3.2",
-    "unzipper": "0.10.11",
-    "@types/unzipper": "0.10.11",
-    "tsx": "4.21.0"
+    "typescript": "5.9.3"
   },
   "peerDependencies": {
     "@livekit/rtc-node": "*"
