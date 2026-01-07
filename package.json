@@ -1,6 +1,6 @@
 {
   "name": "@livekit/plugins-ai-coustics",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "main": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
@@ -8,7 +8,8 @@
     "require": "./dist/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "download-lib.ts"
   ],
   "scripts": {
     "prepublishOnly": "npm run build",
