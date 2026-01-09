@@ -11,6 +11,7 @@
     "dist",
     "download-lib.ts"
   ],
+  "repository": "git@github.com:livekit/plugins-ai-coustics-node",
   "scripts": {
     "prepublishOnly": "npm run build",
     "build": "tsup",
