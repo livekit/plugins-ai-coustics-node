@@ -7,14 +7,14 @@ import {
 } from "@livekit/rtc-node";
 
 import {
-  AudioFilter,
+  Enhancer,
   type StreamInfo,
-  type AudioFilterCredentials,
+  type Credentials,
   type NativeAudioBufferMut,
-  type AudioFilterSettings,
-  type AudioFilterModel,
+  type EnhancerSettings,
+  type EnhancerModel,
   type VadSettings,
-} from "./audio-filter-uniffi-node";
+} from "./plugins-ai-coustics-uniffi-node";
 import { log } from "./logger";
 
 /** The maximum size of a i16 */
@@ -39,19 +39,19 @@ function toNativeAudioBufferMut(samples: Float32Array): NativeAudioBufferMut {
 export const FRAME_USERDATA_AIC_VAD_ATTRIBUTE = "lk.aic-vad";
 
 type AiCousticsAudioEnhancerParams = {
-  model: AudioFilterModel;
+  model: EnhancerModel;
   vadSettings?: VadSettings;
 };
 
 class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
-  private model: AudioFilterModel;
+  private model: EnhancerModel;
   private vadSettings: VadSettings;
 
   private enabled = true;
   private streamInfo: StreamInfo | null = null;
-  private credentials: AudioFilterCredentials | null = null;
-  private filterSettings: AudioFilterSettings | null = null;
-  private filter: AudioFilter | null = null;
+  private credentials: Credentials | null = null;
+  private filterSettings: EnhancerSettings | null = null;
+  private filter: Enhancer | null = null;
 
   constructor(params: AiCousticsAudioEnhancerParams = { model: "quailL" }) {
     super();
@@ -122,7 +122,7 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
 
       this.teardownFilter();
       try {
-        this.filter = new AudioFilter(this.filterSettings);
+        this.filter = new Enhancer(this.filterSettings);
       } catch (err) {
         log.error(`Init failed: ${err}`);
         this.filter = null;
@@ -179,11 +179,11 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
 
 // FIXME: copy this to some entrypoint file somwhere
 export {
-  type AudioFilterModel,
+  type EnhancerModel,
   type VadSettings,
-  type AudioFilterCredentials,
+  type Credentials,
   type StreamInfo,
-} from "./audio-filter-uniffi-node";
+} from "./plugins-ai-coustics-uniffi-node";
 
 export type AudioEnhancementParams = AiCousticsAudioEnhancerParams;
 

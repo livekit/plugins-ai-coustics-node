@@ -3,7 +3,7 @@ import { pino } from "pino";
 
 const isProduction = process.env.NODE_ENV === "production";
 
-const defaultOptions: LoggerOptions = { name: "lk-ai-coustics-audio-filter" };
+const defaultOptions: LoggerOptions = { name: "lk-ai-coustics-enhancer" };
 
 const devOptions: LoggerOptions = {
   ...defaultOptions,
