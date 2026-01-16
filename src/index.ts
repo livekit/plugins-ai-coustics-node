@@ -39,7 +39,7 @@ function toNativeAudioBufferMut(samples: Float32Array): NativeAudioBufferMut {
 export const FRAME_USERDATA_AIC_VAD_ATTRIBUTE = "lk.aic-vad";
 
 type AiCousticsAudioEnhancerParams = {
-  model: EnhancerModel;
+  model?: EnhancerModel;
   vadSettings?: VadSettings;
 };
 
@@ -193,6 +193,6 @@ export type AudioEnhancementParams = AiCousticsAudioEnhancerParams;
  * {@link FRAME_USERDATA_AIC_VAD_ATTRIBUTE } `userdata` attribute containing the output of the
  * aic vad model.
  */
-export function audioEnhancement(params: AudioEnhancementParams) {
+export function audioEnhancement(params?: AudioEnhancementParams) {
   return new AiCousticsAudioEnhancer(params);
 }

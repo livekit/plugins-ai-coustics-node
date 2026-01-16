@@ -468,7 +468,7 @@ export const FfiConverterTypeEnhancerError = (() => {
   return new FFIConverter();
 })();
 
-export type EnhancerModel = "quailL" | "sparrowS" | "sparrowL";
+export type EnhancerModel = "quailL" | "quailVfL" | "sparrowS";
 
 export const FfiConverterTypeEnhancerModel = (() => {
   const ordinalConverter = FfiConverterInt32;
@@ -478,9 +478,9 @@ export const FfiConverterTypeEnhancerModel = (() => {
         case 1:
           return "quailL";
         case 2:
-          return "sparrowS";
+          return "quailVfL";
         case 3:
-          return "sparrowL";
+          return "sparrowS";
         default:
           throw new UniffiInternalError.UnexpectedEnumCase();
       }
@@ -490,10 +490,10 @@ export const FfiConverterTypeEnhancerModel = (() => {
         case "quailL":
           ordinalConverter.write(1, into);
           break;
-        case "sparrowS":
+        case "quailVfL":
           ordinalConverter.write(2, into);
           break;
-        case "sparrowL":
+        case "sparrowS":
           ordinalConverter.write(3, into);
           break;
         default:
