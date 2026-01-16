@@ -53,9 +53,9 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
   private filterSettings: EnhancerSettings | null = null;
   private filter: Enhancer | null = null;
 
-  constructor(params: AiCousticsAudioEnhancerParams = { model: "quailL" }) {
+  constructor(params: AiCousticsAudioEnhancerParams = {}) {
     super();
-    this.model = params.model;
+    this.model = params.model ?? "quailL";
     this.vadSettings = params.vadSettings ?? {};
   }
 
