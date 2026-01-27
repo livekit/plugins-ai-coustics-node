@@ -562,7 +562,11 @@ export class Enhancer
     let settingsArg = UniffiRustBufferValue.allocateWithBytes(
       FfiConverterTypeEnhancerSettings.lower(settings),
     ).toStruct();
-    const pointer = uniffiCaller.rustCall(
+    const pointer = uniffiCaller.rustCallWithError(
+      /*liftError:*/ (buffer) => [
+        "EnhancerError",
+        FfiConverterTypeEnhancerError.lift(buffer),
+      ],
       /*caller:*/ (callStatus) => {
         return FFI_DYNAMIC_LIB.uniffi_plugins_ai_coustics_uniffi_fn_constructor_enhancer_new(
           [settingsArg, callStatus],

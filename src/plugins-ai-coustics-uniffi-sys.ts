@@ -45,7 +45,9 @@ function _uniffiLoad() {
 
   const libraryDirectory = dirname(fileURLToPath(import.meta.url));
 
+  // Get the path to the lib to load
   const libraryPath = join(libraryDirectory, `${library}.${ext}`);
+
   open({ library, path: libraryPath });
   libraryLoaded = true;
 }
@@ -148,7 +150,7 @@ class UniffiFfiRsRustCaller {
 function uniffiCheckCallStatus<ErrorEnumAndVariant extends [string, string]>(
   callStatus: UniffiRustCallStatusStruct,
   liftString: (bytes: UniffiByteArray) => string,
-  liftError?: (buffer: UniffiByteArray) => [string, string],
+  liftError?: (buffer: UniffiByteArray) => ErrorEnumAndVariant,
 ) {
   switch (callStatus.code) {
     case CALL_SUCCESS:
@@ -328,7 +330,6 @@ export class UniffiRustBufferValue {
   }
 
   destroy() {
-    console.log("Rust buffer destroy called", this.struct);
     if (!this.struct) {
       throw new Error(
         "Error destroying UniffiRustBufferValue - already previously destroyed! Double freeing is not allowed.",
