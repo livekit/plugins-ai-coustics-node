@@ -7,7 +7,7 @@ import { Open } from "unzipper";
 import fetch from "node-fetch";
 
 const PACKAGE_NAME = "plugins_ai_coustics_uniffi";
-const PACKAGE_VERSION = "0.1.9";
+const PACKAGE_VERSION = "0.1.10";
 const DOWNLOAD_BASE_URL =
   "https://github.com/livekit/plugins-ai-coustics-node/releases/download";
 const OUTPUT_DIR_PATH = resolve("dist/");
