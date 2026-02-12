@@ -1,6 +1,6 @@
 {
   "name": "@livekit/plugins-ai-coustics",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "main": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
@@ -40,6 +40,6 @@
     "typescript": "5.9.3"
   },
   "peerDependencies": {
-    "@livekit/rtc-node": "*"
+    "@livekit/rtc-node": "^0.13.24"
   }
 }

@@ -43,7 +43,8 @@ function _uniffiLoad() {
     ext = "so";
   }
 
-  const libraryDirectory = dirname(fileURLToPath(import.meta.url));
+  const filePath = fileURLToPath(import.meta.url);
+  const libraryDirectory = dirname(filePath);
 
   // Get the path to the lib to load
   const libraryPath = join(libraryDirectory, `${library}.${ext}`);

@@ -158,6 +158,7 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
       frame.sampleRate,
       frame.channels,
       frame.samplesPerChannel,
+      frame.userdata,
     );
 
     outputFrame.userdata[FRAME_USERDATA_AIC_VAD_ATTRIBUTE] = vadData;
