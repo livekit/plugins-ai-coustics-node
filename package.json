@@ -1,6 +1,7 @@
 {
   "name": "@livekit/plugins-ai-coustics",
-  "version": "0.1.11",
+  "version": "0.1.12",
+  "license": "SEE LICENSE IN https://livekit.io/legal/terms-of-service",
   "main": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
