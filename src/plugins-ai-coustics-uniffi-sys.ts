@@ -2,6 +2,8 @@ import { join, dirname } from "path";
 
 import { fileURLToPath } from "url";
 
+import { createRequire } from "module";
+
 import {
   DataType,
   JsExternal,
@@ -47,7 +49,96 @@ function _uniffiLoad() {
   const libraryDirectory = dirname(filePath);
 
   // Get the path to the lib to load
-  const libraryPath = join(libraryDirectory, `${library}.${ext}`);
+
+  let libPathModule;
+  let libPathModuleLastResolutionError: Error | null = null;
+  let libPathModuleLoadAttemptStack: Array<string> = [];
+
+  const commonjsRequire = createRequire(filePath);
+  switch (process.platform) {
+    case "darwin":
+      switch (process.arch) {
+        case "arm64":
+          if (!libPathModule) {
+            try {
+              libPathModule = commonjsRequire(
+                "@livekit/plugins-ai-coustics-aarch64-apple-darwin",
+              );
+            } catch (e) {
+              libPathModuleLastResolutionError = e as Error;
+              libPathModuleLoadAttemptStack.push(
+                "@livekit/plugins-ai-coustics-aarch64-apple-darwin",
+              );
+            }
+          }
+          break;
+        case "x64":
+          if (!libPathModule) {
+            try {
+              libPathModule = commonjsRequire(
+                "@livekit/plugins-ai-coustics-x86_64-apple-darwin",
+              );
+            } catch (e) {
+              libPathModuleLastResolutionError = e as Error;
+              libPathModuleLoadAttemptStack.push(
+                "@livekit/plugins-ai-coustics-x86_64-apple-darwin",
+              );
+            }
+          }
+          break;
+      }
+      break;
+    case "linux":
+      switch (process.arch) {
+        case "x64":
+          if (!libPathModule) {
+            try {
+              libPathModule = commonjsRequire(
+                "@livekit/plugins-ai-coustics-x86_64-unknown-linux-gnu",
+              );
+            } catch (e) {
+              libPathModuleLastResolutionError = e as Error;
+              libPathModuleLoadAttemptStack.push(
+                "@livekit/plugins-ai-coustics-x86_64-unknown-linux-gnu",
+              );
+            }
+          }
+          break;
+      }
+      break;
+    case "win32":
+      switch (process.arch) {
+        case "x64":
+          if (!libPathModule) {
+            try {
+              libPathModule = commonjsRequire(
+                "@livekit/plugins-ai-coustics-x86_64-pc-windows-msvc",
+              );
+            } catch (e) {
+              libPathModuleLastResolutionError = e as Error;
+              libPathModuleLoadAttemptStack.push(
+                "@livekit/plugins-ai-coustics-x86_64-pc-windows-msvc",
+              );
+            }
+          }
+          break;
+      }
+      break;
+  }
+  if (!libPathModule) {
+    const messageFragments = [
+      `Failed to load a native binding library!`,
+      `Attempted loading from the following modules in order: ${libPathModuleLoadAttemptStack.join(", ")}.`,
+    ];
+    if (libPathModuleLastResolutionError) {
+      messageFragments.push(
+        `The error message from the final load attempt is: ${libPathModuleLastResolutionError?.stack ?? libPathModuleLastResolutionError}`,
+      );
+    }
+    throw new Error(messageFragments.join("\n"));
+  }
+
+  const libraryPath = libPathModule.default().path;
 
   open({ library, path: libraryPath });
   libraryLoaded = true;
