@@ -157,6 +157,7 @@ export type EnhancerSettings = {
   samplesPerChannel: /*u32*/ number;
   credentials: Credentials;
   model: EnhancerModel;
+  modelParameters: ModelParameters;
   vad: VadSettings;
 };
 
@@ -197,6 +198,7 @@ const FfiConverterTypeEnhancerSettings = (() => {
         samplesPerChannel: FfiConverterUInt32.read(from),
         credentials: FfiConverterTypeCredentials.read(from),
         model: FfiConverterTypeEnhancerModel.read(from),
+        modelParameters: FfiConverterTypeModelParameters.read(from),
         vad: FfiConverterTypeVadSettings.read(from),
       };
     }
@@ -206,6 +208,7 @@ const FfiConverterTypeEnhancerSettings = (() => {
       FfiConverterUInt32.write(value.samplesPerChannel, into);
       FfiConverterTypeCredentials.write(value.credentials, into);
       FfiConverterTypeEnhancerModel.write(value.model, into);
+      FfiConverterTypeModelParameters.write(value.modelParameters, into);
       FfiConverterTypeVadSettings.write(value.vad, into);
     }
     allocationSize(value: TypeName): number {
@@ -215,7 +218,72 @@ const FfiConverterTypeEnhancerSettings = (() => {
         FfiConverterUInt32.allocationSize(value.samplesPerChannel) +
         FfiConverterTypeCredentials.allocationSize(value.credentials) +
         FfiConverterTypeEnhancerModel.allocationSize(value.model) +
+        FfiConverterTypeModelParameters.allocationSize(value.modelParameters) +
         FfiConverterTypeVadSettings.allocationSize(value.vad)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
+export type ModelParameters = {
+  bypass?: /*f32*/ number;
+  enhancementLevel?: /*f32*/ number;
+};
+
+export const ModelParameters = (() => {
+  const defaults = () => ({}); // FIXME: add defaults here!
+  const create = (() => {
+    return uniffiCreateRecord<ModelParameters, ReturnType<typeof defaults>>(
+      defaults,
+    );
+  })();
+  return Object.freeze({
+    /**
+     * Create a frozen instance of {@link ModelParameters}, with defaults specified
+     * in Rust, in the {@link plugins_ai_coustics_uniffi} crate.
+     */
+    create,
+
+    /**
+     * Create a frozen instance of {@link ModelParameters}, with defaults specified
+     * in Rust, in the {@link plugins_ai_coustics_uniffi} crate.
+     */
+    new: create,
+
+    /**
+     * Defaults specified in the {@link plugins_ai_coustics_uniffi} crate.
+     */
+    defaults: () => Object.freeze(defaults()) as Partial<ModelParameters>,
+  });
+})();
+
+const FfiConverterTypeModelParameters = (() => {
+  type TypeName = ModelParameters;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    read(from: RustBuffer): TypeName {
+      return {
+        bypass: new FfiConverterOptional(FfiConverterFloat32).read(from),
+        enhancementLevel: new FfiConverterOptional(FfiConverterFloat32).read(
+          from,
+        ),
+      };
+    }
+    write(value: TypeName, into: RustBuffer): void {
+      new FfiConverterOptional(FfiConverterFloat32).write(value.bypass, into);
+      new FfiConverterOptional(FfiConverterFloat32).write(
+        value.enhancementLevel,
+        into,
+      );
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        new FfiConverterOptional(FfiConverterFloat32).allocationSize(
+          value.bypass,
+        ) +
+        new FfiConverterOptional(FfiConverterFloat32).allocationSize(
+          value.enhancementLevel,
+        )
       );
     }
   }

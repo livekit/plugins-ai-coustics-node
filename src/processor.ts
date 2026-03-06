@@ -14,6 +14,7 @@ import {
   type EnhancerSettings,
   type EnhancerModel,
   type VadSettings,
+  type ModelParameters,
 } from "./plugins-ai-coustics-uniffi-node";
 import { log } from "./logger";
 
@@ -41,11 +42,13 @@ export const FRAME_USERDATA_AIC_VAD_ATTRIBUTE = "lk.aic-vad";
 type AiCousticsAudioEnhancerParams = {
   model?: EnhancerModel;
   vadSettings?: VadSettings;
+  modelParameters?: ModelParameters;
 };
 
 class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
   private model: EnhancerModel;
   private vadSettings: VadSettings;
+  private modelParameters: ModelParameters;
 
   private enabled = true;
   private streamInfo: StreamInfo | null = null;
@@ -57,6 +60,7 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
     super();
     this.model = params.model ?? "quailL";
     this.vadSettings = params.vadSettings ?? {};
+    this.modelParameters = params.modelParameters ?? {};
   }
 
   isEnabled(): boolean {
@@ -117,6 +121,7 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
         numChannels: frame.channels,
         samplesPerChannel: frame.samplesPerChannel,
         credentials: this.credentials,
+        modelParameters: this.modelParameters,
         vad: this.vadSettings,
       };
 
