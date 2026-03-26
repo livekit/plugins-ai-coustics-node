@@ -72,6 +72,20 @@ function _uniffiLoad() {
             }
           }
           break;
+        case "linux":
+          if (!libPathModule) {
+            try {
+              libPathModule = commonjsRequire(
+                "@livekit/plugins-ai-coustics-aarch64-unknown-linux-gnu",
+              );
+            } catch (e) {
+              libPathModuleLastResolutionError = e as Error;
+              libPathModuleLoadAttemptStack.push(
+                "@livekit/plugins-ai-coustics-aarch64-unknown-linux-gnu",
+              );
+            }
+          }
+          break;
       }
       break;
     case "x64":
