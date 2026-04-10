@@ -1,8 +1,4 @@
-// NOTE: @napi-ffi/ref-napi (1) is a maintained version of ref-napi. However, it does NOT include
-// typings, so to work around this, explicitly import the legacy package's typings (2) as they are
-// the same. This is a regrettable state of affairs...
-import "@napi-ffi/ref-napi"; /* 1 */
-/// <reference types="@types/ref-napi" /> /* 2 */
+import "ref-napi";
 
 import {
   AudioFrame,
