@@ -1,11 +1,10 @@
-import "ref-napi";
-
 import {
   AudioFrame,
   FrameProcessor,
   type FrameProcessorStreamInfo,
   type FrameProcessorCredentials,
 } from "@livekit/rtc-node";
+import { DataType, createPointer, restorePointer } from "ffi-rs";
 
 import {
   Enhancer,
@@ -22,12 +21,29 @@ import { log } from "./logger";
 /** The maximum size of a i16 */
 const MAX_SHORT_SIZE = 2 ** 15 - 1;
 
-/** Converts a Float32Array into a pointer and length, so it can be passed to the native rust module */
+/** Converts a Float32Array into a pointer and length, so it can be passed to the native rust module.
+ *
+ * The returned `ptr` is the raw address of the backing buffer's memory, obtained by
+ * round-tripping through ffi-rs's `createPointer` / `restorePointer` helpers.
+ */
 function toNativeAudioBufferMut(samples: Float32Array): NativeAudioBufferMut {
   const samplesBuffer = Buffer.from(samples.buffer);
   const sampleLength = samples.length;
 
-  const baseAddress = BigInt(samplesBuffer.address());
+  // NOTE: `DataType.U8Array` is intentionally used rather than `DataType.FloatArray`. A Node
+  // `Buffer` is a `Uint8Array`, so ffi-rs hands us the true underlying data pointer without
+  // copying. `FloatArray` would refuse a `Float32Array` outright ("Object is not array") and,
+  // given a plain `number[]`, would allocate its own C-side copy - we'd lose the in-place
+  // mutations the rust side writes back. The bytes are the bytes; the u8 view is just how
+  // we ask ffi-rs to hand them off.
+  const external = createPointer({
+    paramsType: [DataType.U8Array],
+    paramsValue: [samplesBuffer],
+  });
+  const [baseAddress] = restorePointer({
+    retType: [DataType.BigInt],
+    paramsValue: external,
+  }) as unknown as [bigint];
 
   return {
     ptr: baseAddress,

@@ -1,6 +1,6 @@
 {
   "name": "@livekit/plugins-ai-coustics",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "license": "SEE LICENSE IN https://livekit.io/legal/terms-of-service",
   "type": "module",
   "main": "dist/index.js",
@@ -37,8 +37,7 @@
     "node-fetch": "3.3.2",
     "unzipper": "0.10.11",
     "@types/unzipper": "0.10.11",
-    "tsx": "4.21.0",
-    "ref-napi": "^3.0.3"
+    "tsx": "4.21.0"
   },
   "devDependencies": {
     "@types/node": "^18",
@@ -47,15 +46,14 @@
     "typescript": "5.9.3"
   },
   "optionalDependencies": {
-    "@livekit/plugins-ai-coustics-aarch64-apple-darwin": "0.2.9",
-    "@livekit/plugins-ai-coustics-aarch64-unknown-linux-gnu": "0.2.9",
-    "@livekit/plugins-ai-coustics-x86_64-apple-darwin": "0.2.9",
-    "@livekit/plugins-ai-coustics-x86_64-pc-windows-msvc": "0.2.9",
-    "@livekit/plugins-ai-coustics-x86_64-unknown-linux-gnu": "0.2.9"
+    "@livekit/plugins-ai-coustics-aarch64-apple-darwin": "0.2.10",
+    "@livekit/plugins-ai-coustics-aarch64-unknown-linux-gnu": "0.2.10",
+    "@livekit/plugins-ai-coustics-x86_64-apple-darwin": "0.2.10",
+    "@livekit/plugins-ai-coustics-x86_64-pc-windows-msvc": "0.2.10",
+    "@livekit/plugins-ai-coustics-x86_64-unknown-linux-gnu": "0.2.10"
   },
   "peerDependencies": {
     "@livekit/rtc-node": "^0.13.24",
-    "@livekit/agents": "^1.0.43",
-    "@types/ref-napi": "^3.0.12"
+    "@livekit/agents": "^1.0.43"
   }
 }
