@@ -202,12 +202,34 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
 
 export type AudioEnhancementParams = AiCousticsAudioEnhancerParams;
 
+type DeprecatedModels = "sparrowS";
+
+type NonDeprecatedAudioEnhancementParams = Omit<
+  AudioEnhancementParams,
+  "model"
+> & {
+  model?: Exclude<EnhancerModel, DeprecatedModels>;
+};
+
 /**
  * Implements a mechanism to apply [ai-coustics models](https://ai-coustics.com/) on audio data
  * represented as {@link AudioFrame}s. In addition, each frame will be annotated with a
  * {@link FRAME_USERDATA_AIC_VAD_ATTRIBUTE } `userdata` attribute containing the output of the
  * aic vad model.
- */
+ **/
+export function audioEnhancement(
+  params?: NonDeprecatedAudioEnhancementParams,
+): AiCousticsAudioEnhancer;
+/**
+ * Implements a mechanism to apply [ai-coustics models](https://ai-coustics.com/) on audio data
+ * represented as {@link AudioFrame}s. In addition, each frame will be annotated with a
+ * {@link FRAME_USERDATA_AIC_VAD_ATTRIBUTE } `userdata` attribute containing the output of the
+ * aic vad model.
+ * @deprecated Set model to rookS instead, sparrowS is deprecated.
+ **/
+export function audioEnhancement(
+  params: AudioEnhancementParams,
+): AiCousticsAudioEnhancer;
 export function audioEnhancement(params?: AudioEnhancementParams) {
   return new AiCousticsAudioEnhancer(params);
 }
