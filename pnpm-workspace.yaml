@@ -1,0 +1,5 @@
+allowBuilds:
+  "@ffmpeg-installer/linux-arm64": false
+  esbuild: false
+  protobufjs: false
+  sharp: false
