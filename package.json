@@ -49,5 +49,13 @@
   "peerDependencies": {
     "@livekit/rtc-node": "^0.13.24",
     "@livekit/agents": "^1.0.43"
+  },
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "@ffmpeg-installer/linux-x64",
+      "esbuild",
+      "protobufjs",
+      "sharp"
+    ]
   }
 }

@@ -55,10 +55,10 @@ function _uniffiLoad() {
   let libPathModuleLoadAttemptStack: Array<string> = [];
 
   const commonjsRequire = createRequire(filePath);
-  switch (process.arch) {
-    case "arm64":
-      switch (process.platform) {
-        case "darwin":
+  switch (process.platform) {
+    case "darwin":
+      switch (process.arch) {
+        case "arm64":
           if (!libPathModule) {
             try {
               libPathModule = commonjsRequire(
@@ -72,39 +72,39 @@ function _uniffiLoad() {
             }
           }
           break;
-        case "linux":
+        case "x64":
           if (!libPathModule) {
             try {
               libPathModule = commonjsRequire(
-                "@livekit/plugins-ai-coustics-aarch64-unknown-linux-gnu",
+                "@livekit/plugins-ai-coustics-x86_64-apple-darwin",
               );
             } catch (e) {
               libPathModuleLastResolutionError = e as Error;
               libPathModuleLoadAttemptStack.push(
-                "@livekit/plugins-ai-coustics-aarch64-unknown-linux-gnu",
+                "@livekit/plugins-ai-coustics-x86_64-apple-darwin",
               );
             }
           }
           break;
       }
       break;
-    case "x64":
-      switch (process.platform) {
-        case "darwin":
+    case "linux":
+      switch (process.arch) {
+        case "arm64":
           if (!libPathModule) {
             try {
               libPathModule = commonjsRequire(
-                "@livekit/plugins-ai-coustics-x86_64-apple-darwin",
+                "@livekit/plugins-ai-coustics-aarch64-unknown-linux-gnu",
               );
             } catch (e) {
               libPathModuleLastResolutionError = e as Error;
               libPathModuleLoadAttemptStack.push(
-                "@livekit/plugins-ai-coustics-x86_64-apple-darwin",
+                "@livekit/plugins-ai-coustics-aarch64-unknown-linux-gnu",
               );
             }
           }
           break;
-        case "linux":
+        case "x64":
           if (!libPathModule) {
             try {
               libPathModule = commonjsRequire(
@@ -118,7 +118,11 @@ function _uniffiLoad() {
             }
           }
           break;
-        case "win32":
+      }
+      break;
+    case "win32":
+      switch (process.arch) {
+        case "x64":
           if (!libPathModule) {
             try {
               libPathModule = commonjsRequire(
