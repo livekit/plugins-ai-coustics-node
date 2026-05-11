@@ -155,7 +155,6 @@ export type EnhancerSettings = {
   sampleRate: /*u32*/ number;
   numChannels: /*u16*/ number;
   samplesPerChannel: /*u32*/ number;
-  credentials: Credentials;
   model: EnhancerModel;
   modelParameters: ModelParameters;
   vad: VadSettings;
@@ -196,7 +195,6 @@ const FfiConverterTypeEnhancerSettings = (() => {
         sampleRate: FfiConverterUInt32.read(from),
         numChannels: FfiConverterUInt16.read(from),
         samplesPerChannel: FfiConverterUInt32.read(from),
-        credentials: FfiConverterTypeCredentials.read(from),
         model: FfiConverterTypeEnhancerModel.read(from),
         modelParameters: FfiConverterTypeModelParameters.read(from),
         vad: FfiConverterTypeVadSettings.read(from),
@@ -206,7 +204,6 @@ const FfiConverterTypeEnhancerSettings = (() => {
       FfiConverterUInt32.write(value.sampleRate, into);
       FfiConverterUInt16.write(value.numChannels, into);
       FfiConverterUInt32.write(value.samplesPerChannel, into);
-      FfiConverterTypeCredentials.write(value.credentials, into);
       FfiConverterTypeEnhancerModel.write(value.model, into);
       FfiConverterTypeModelParameters.write(value.modelParameters, into);
       FfiConverterTypeVadSettings.write(value.vad, into);
@@ -216,7 +213,6 @@ const FfiConverterTypeEnhancerSettings = (() => {
         FfiConverterUInt32.allocationSize(value.sampleRate) +
         FfiConverterUInt16.allocationSize(value.numChannels) +
         FfiConverterUInt32.allocationSize(value.samplesPerChannel) +
-        FfiConverterTypeCredentials.allocationSize(value.credentials) +
         FfiConverterTypeEnhancerModel.allocationSize(value.model) +
         FfiConverterTypeModelParameters.allocationSize(value.modelParameters) +
         FfiConverterTypeVadSettings.allocationSize(value.vad)
@@ -502,6 +498,85 @@ const FfiConverterTypeVadSettings = (() => {
 // Enum definitions:
 // ==========
 
+/**
+ * Selects the authentication mode for the audio enhancer.
+ */
+export type AuthMode =
+  /**
+   * Use LiveKit Cloud for authorization and usage reporting (default).
+   */
+  | {
+      tag: "liveKitCloud";
+      inner: Readonly<{ url: string; token: string }>;
+    }
+  /**
+   * Use your own ai-coustics API credentials directly, bypassing LiveKit Cloud.
+   */
+  | {
+      tag: "aiCousticsApi";
+      inner: Readonly<{ licenseKey: string }>;
+    };
+
+export const FfiConverterTypeAuthMode = (() => {
+  const ordinalConverter = FfiConverterInt32;
+  class FFIConverter extends AbstractFfiConverterByteArray<AuthMode> {
+    read(from: RustBuffer): AuthMode {
+      switch (ordinalConverter.read(from)) {
+        case 1:
+          return {
+            tag: "liveKitCloud",
+            inner: {
+              url: FfiConverterString.read(from),
+              token: FfiConverterString.read(from),
+            },
+          };
+        case 2:
+          return {
+            tag: "aiCousticsApi",
+            inner: {
+              licenseKey: FfiConverterString.read(from),
+            },
+          };
+        default:
+          throw new UniffiInternalError.UnexpectedEnumCase();
+      }
+    }
+    write(value: AuthMode, into: RustBuffer): void {
+      switch (value.tag) {
+        case "liveKitCloud":
+          ordinalConverter.write(1, into);
+          FfiConverterString.write(value.inner.url, into);
+          FfiConverterString.write(value.inner.token, into);
+          break;
+        case "aiCousticsApi":
+          ordinalConverter.write(2, into);
+          FfiConverterString.write(value.inner.licenseKey, into);
+          break;
+        default:
+          throw new UniffiInternalError.UnexpectedEnumCase();
+      }
+    }
+    allocationSize(value: AuthMode): number {
+      switch (value.tag) {
+        case "liveKitCloud":
+          return (
+            ordinalConverter.allocationSize(1) +
+            FfiConverterString.allocationSize(value.inner.url) +
+            FfiConverterString.allocationSize(value.inner.token)
+          );
+        case "aiCousticsApi":
+          return (
+            ordinalConverter.allocationSize(2) +
+            FfiConverterString.allocationSize(value.inner.licenseKey)
+          );
+        default:
+          throw new UniffiInternalError.UnexpectedEnumCase();
+      }
+    }
+  }
+  return new FFIConverter();
+})();
+
 export type EnhancerError = "model" | "authorization";
 
 export const FfiConverterTypeEnhancerError = (() => {
@@ -639,9 +714,12 @@ export class Enhancer
  * the result is an error.
 
  */
-  constructor(settings: EnhancerSettings) {
+  constructor(auth: AuthMode, settings: EnhancerSettings) {
     super();
 
+    let authArg = UniffiRustBufferValue.allocateWithBytes(
+      FfiConverterTypeAuthMode.lower(auth),
+    ).toStruct();
     let settingsArg = UniffiRustBufferValue.allocateWithBytes(
       FfiConverterTypeEnhancerSettings.lower(settings),
     ).toStruct();
@@ -652,7 +730,7 @@ export class Enhancer
       ],
       /*caller:*/ (callStatus) => {
         return FFI_DYNAMIC_LIB.uniffi_plugins_ai_coustics_uniffi_fn_constructor_enhancer_new(
-          [settingsArg, callStatus],
+          [authArg, settingsArg, callStatus],
         );
       },
       /*liftString:*/ FfiConverterString.lift,

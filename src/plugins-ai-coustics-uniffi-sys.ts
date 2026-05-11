@@ -830,6 +830,7 @@ const FFI_DYNAMIC_LIB = define({
     retType: /* handle */ DataType.U64,
     paramsType: [
       DataType_UniffiRustBufferStruct,
+      DataType_UniffiRustBufferStruct,
       /* RustCallStatus */ DataType.External,
     ],
   },
@@ -1356,6 +1357,7 @@ const FFI_DYNAMIC_LIB = define({
   ) => void;
   uniffi_plugins_ai_coustics_uniffi_fn_constructor_enhancer_new: (
     args: [
+      /* auth */ /* RustBuffer */ UniffiRustBufferStruct,
       /* settings */ /* RustBuffer */ UniffiRustBufferStruct,
       /* RustCallStatus */ JsExternal,
     ],

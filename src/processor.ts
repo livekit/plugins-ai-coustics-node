@@ -17,6 +17,7 @@ import {
   type ModelParameters,
 } from "./plugins-ai-coustics-uniffi-node";
 import { log } from "./logger";
+import { type AuthBase, Auth, toAuthMode } from "./auth";
 
 /** The maximum size of a i16 */
 const MAX_SHORT_SIZE = 2 ** 15 - 1;
@@ -60,12 +61,15 @@ type AiCousticsAudioEnhancerParams = {
   model?: EnhancerModel;
   vadSettings?: VadSettings;
   modelParameters?: ModelParameters;
+  auth?: AuthBase;
 };
 
 class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
   private model: EnhancerModel;
   private vadSettings: VadSettings;
   private modelParameters: ModelParameters;
+  private auth: AuthBase;
+  private lastErrorMessage: string | null;
 
   private enabled = true;
   private streamInfo: StreamInfo | null = null;
@@ -78,6 +82,8 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
     this.model = params.model ?? "quailL";
     this.vadSettings = params.vadSettings ?? {};
     this.modelParameters = params.modelParameters ?? {};
+    this.auth = params.auth ?? Auth.livekitCloud();
+    this.lastErrorMessage = null;
   }
 
   isEnabled(): boolean {
@@ -119,8 +125,19 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
       return frame;
     }
 
-    if (!this.credentials || !this.streamInfo) {
-      log.error("Missing configuration");
+    const authMode = this.auth[toAuthMode](this.credentials);
+    if (!authMode) {
+      this.logProcessFrameError("Missing auth mode");
+      return frame;
+    }
+
+    if (this.authModeRequiresUpdateCredentialsCall() && !this.credentials) {
+      this.logProcessFrameError("Missing credentials");
+      return frame;
+    }
+
+    if (this.authModeRequiresUpdateStreamInfoCall() && !this.streamInfo) {
+      this.logProcessFrameError("Missing stream info");
       return frame;
     }
 
@@ -137,20 +154,26 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
         sampleRate: frame.sampleRate,
         numChannels: frame.channels,
         samplesPerChannel: frame.samplesPerChannel,
-        credentials: this.credentials,
         modelParameters: this.modelParameters,
         vad: this.vadSettings,
       };
 
       this.teardownFilter();
       try {
-        this.filter = new Enhancer(this.filterSettings);
+        this.filter = new Enhancer(authMode, this.filterSettings);
       } catch (err) {
-        log.error(`Init failed: ${err}`);
+        this.logProcessFrameError(
+          this.auth.provider === "aiCousticsApi"
+            ? `Failed to initialize plugin core: ${err}. Is your ai-coustics api key correct? Disabling noise cancellation for all following audio frames.`
+            : `Failed to initialize plugin core: ${err}. Disabling noise cancellation for all following audio frames.`,
+        );
         this.filter = null;
+        this.enabled = false;
         return frame;
       }
-      this.filter.updateStreamInfo(this.streamInfo);
+      if (this.streamInfo) {
+        this.filter.updateStreamInfo(this.streamInfo);
+      }
     }
 
     const frameDataI16: Int16Array = frame.data;
@@ -166,7 +189,7 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
       // NOTE: filter.process processes in place and modifies `frameDataF32`.
       vadData = this.filter.processWithVad(nativeAudioBufferMut);
     } catch (err) {
-      log.error(`Processing failed: ${err}`);
+      this.logProcessFrameError(`Processing failed: ${err}`);
       return frame;
     }
 
@@ -185,6 +208,36 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
 
     outputFrame.userdata[FRAME_USERDATA_AIC_VAD_ATTRIBUTE] = vadData;
     return outputFrame;
+  }
+
+  /**
+   * Does the given auth mode require updateStreamInfo be called?
+   */
+  private authModeRequiresUpdateStreamInfoCall() {
+    return this.auth.provider === "livekitCloud";
+  }
+
+  /**
+   * Does the given auth mode require updateCredentials be called?
+   *
+   * Note that this is just here to provide helpful warnings to users,
+   * the actual auth layer is in the rust core.
+   */
+  private authModeRequiresUpdateCredentialsCall() {
+    return this.auth.provider === "livekitCloud";
+  }
+
+  /**
+   * Logs a new error to the screen when processing a frame.
+   * Only shows logs which were newly introduced as compared with the
+   * last processed frame.
+   */
+  private logProcessFrameError(message: string) {
+    if (this.lastErrorMessage === message) {
+      return;
+    }
+    this.lastErrorMessage = message;
+    log.error(message);
   }
 
   private teardownFilter() {
