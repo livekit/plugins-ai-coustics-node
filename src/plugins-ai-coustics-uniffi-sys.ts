@@ -241,15 +241,23 @@ class UniffiFfiRsRustCaller {
     _checkUniffiLoaded();
 
     const $callStatus = this.createCallStatus();
-    let returnedVal = caller(unwrapPointer($callStatus)[0]);
+    try {
+      let returnedVal = caller(unwrapPointer($callStatus)[0]);
 
-    const [callStatus] = restorePointer({
-      retType: [DataType_UniffiRustCallStatus],
-      paramsValue: $callStatus,
-    });
-    uniffiCheckCallStatus(callStatus, liftString, liftError);
+      const [callStatus] = restorePointer({
+        retType: [DataType_UniffiRustCallStatus],
+        paramsValue: $callStatus,
+      });
+      uniffiCheckCallStatus(callStatus, liftString, liftError);
 
-    return returnedVal;
+      return returnedVal;
+    } finally {
+      freePointer({
+        paramsType: [DataType_UniffiRustCallStatus],
+        paramsValue: $callStatus,
+        pointerType: PointerType.RsPointer,
+      });
+    }
   }
 }
 
@@ -370,25 +378,30 @@ export class UniffiRustBufferValue {
       paramsValue: [bytes],
     });
 
-    const rustBuffer = uniffiCaller.rustCall((callStatus) => {
-      return FFI_DYNAMIC_LIB.ffi_plugins_ai_coustics_uniffi_rustbuffer_from_bytes(
-        [
-          // TODO: figure out why this is necessary.
-          { data: unwrapPointer([dataPointer])[0], len: bytes.byteLength },
-          callStatus,
+    try {
+      const rustBuffer = uniffiCaller.rustCall((callStatus) => {
+        return FFI_DYNAMIC_LIB.ffi_plugins_ai_coustics_uniffi_rustbuffer_from_bytes(
+          [
+            // TODO: figure out why this is necessary.
+            { data: unwrapPointer([dataPointer])[0], len: bytes.byteLength },
+            callStatus,
+          ],
+        );
+      }, /*liftString:*/ FfiConverterString.lift);
+
+      return new UniffiRustBufferValue(rustBuffer);
+    } finally {
+      freePointer({
+        paramsType: [
+          arrayConstructor({
+            type: DataType.U8Array,
+            length: bytes.byteLength,
+          }),
         ],
-      );
-    }, /*liftString:*/ FfiConverterString.lift);
-
-    freePointer({
-      paramsType: [
-        arrayConstructor({ type: DataType.U8Array, length: bytes.byteLength }),
-      ],
-      paramsValue: [dataPointer],
-      pointerType: PointerType.RsPointer,
-    });
-
-    return new UniffiRustBufferValue(rustBuffer);
+        paramsValue: [dataPointer],
+        pointerType: PointerType.RsPointer,
+      });
+    }
   }
 
   static allocateEmpty() {
@@ -416,17 +429,22 @@ export class UniffiRustBufferValue {
       );
     }
 
-    const [contents] = restorePointer({
-      retType: [
-        arrayConstructor({
-          type: DataType.U8Array,
-          length: Number(this.struct.len),
-        }),
-      ],
-      paramsValue: wrapPointer([this.struct.data]),
-    });
+    const length = Number(this.struct.len);
+    const wrapped = wrapPointer([this.struct.data]);
+    try {
+      const [contents] = restorePointer({
+        retType: [arrayConstructor({ type: DataType.U8Array, length })],
+        paramsValue: wrapped,
+      });
 
-    return new Uint8Array(contents);
+      return new Uint8Array(contents);
+    } finally {
+      freePointer({
+        paramsType: [arrayConstructor({ type: DataType.U8Array, length })],
+        paramsValue: wrapped,
+        pointerType: PointerType.RsPointer,
+      });
+    }
   }
 
   consumeIntoUint8Array() {
