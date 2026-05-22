@@ -55,10 +55,10 @@ function _uniffiLoad() {
   let libPathModuleLoadAttemptStack: Array<string> = [];
 
   const commonjsRequire = createRequire(filePath);
-  switch (process.platform) {
-    case "darwin":
-      switch (process.arch) {
-        case "arm64":
+  switch (process.arch) {
+    case "arm64":
+      switch (process.platform) {
+        case "darwin":
           if (!libPathModule) {
             try {
               libPathModule = commonjsRequire(
@@ -72,25 +72,7 @@ function _uniffiLoad() {
             }
           }
           break;
-        case "x64":
-          if (!libPathModule) {
-            try {
-              libPathModule = commonjsRequire(
-                "@livekit/plugins-ai-coustics-x86_64-apple-darwin",
-              );
-            } catch (e) {
-              libPathModuleLastResolutionError = e as Error;
-              libPathModuleLoadAttemptStack.push(
-                "@livekit/plugins-ai-coustics-x86_64-apple-darwin",
-              );
-            }
-          }
-          break;
-      }
-      break;
-    case "linux":
-      switch (process.arch) {
-        case "arm64":
+        case "linux":
           if (!libPathModule) {
             try {
               libPathModule = commonjsRequire(
@@ -104,7 +86,25 @@ function _uniffiLoad() {
             }
           }
           break;
-        case "x64":
+      }
+      break;
+    case "x64":
+      switch (process.platform) {
+        case "darwin":
+          if (!libPathModule) {
+            try {
+              libPathModule = commonjsRequire(
+                "@livekit/plugins-ai-coustics-x86_64-apple-darwin",
+              );
+            } catch (e) {
+              libPathModuleLastResolutionError = e as Error;
+              libPathModuleLoadAttemptStack.push(
+                "@livekit/plugins-ai-coustics-x86_64-apple-darwin",
+              );
+            }
+          }
+          break;
+        case "linux":
           if (!libPathModule) {
             try {
               libPathModule = commonjsRequire(
@@ -118,11 +118,7 @@ function _uniffiLoad() {
             }
           }
           break;
-      }
-      break;
-    case "win32":
-      switch (process.arch) {
-        case "x64":
+        case "win32":
           if (!libPathModule) {
             try {
               libPathModule = commonjsRequire(
@@ -892,11 +888,30 @@ const FFI_DYNAMIC_LIB = define({
       /* RustCallStatus */ DataType.External,
     ],
   },
+  uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_update_model_parameters:
+    {
+      library: "libplugins_ai_coustics_uniffi",
+      retType: DataType.Void,
+      paramsType: [
+        /* handle */ DataType.U64,
+        DataType_UniffiRustBufferStruct,
+        /* RustCallStatus */ DataType.External,
+      ],
+    },
   uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_update_stream_info: {
     library: "libplugins_ai_coustics_uniffi",
     retType: DataType.Void,
     paramsType: [
       /* handle */ DataType.U64,
+      DataType_UniffiRustBufferStruct,
+      /* RustCallStatus */ DataType.External,
+    ],
+  },
+  uniffi_plugins_ai_coustics_uniffi_fn_func_model_parameters_equal: {
+    library: "libplugins_ai_coustics_uniffi",
+    retType: /* i8 */ DataType.U8,
+    paramsType: [
+      DataType_UniffiRustBufferStruct,
       DataType_UniffiRustBufferStruct,
       /* RustCallStatus */ DataType.External,
     ],
@@ -1255,6 +1270,11 @@ const FFI_DYNAMIC_LIB = define({
       /* RustCallStatus */ DataType.External,
     ],
   },
+  uniffi_plugins_ai_coustics_uniffi_checksum_func_model_parameters_equal: {
+    library: "libplugins_ai_coustics_uniffi",
+    retType: /* u16 */ DataType.U64,
+    paramsType: [],
+  },
   uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_process: {
     library: "libplugins_ai_coustics_uniffi",
     retType: /* u16 */ DataType.U64,
@@ -1271,6 +1291,12 @@ const FFI_DYNAMIC_LIB = define({
     paramsType: [],
   },
   uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_update_credentials:
+    {
+      library: "libplugins_ai_coustics_uniffi",
+      retType: /* u16 */ DataType.U64,
+      paramsType: [],
+    },
+  uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_update_model_parameters:
     {
       library: "libplugins_ai_coustics_uniffi",
       retType: /* u16 */ DataType.U64,
@@ -1412,6 +1438,13 @@ const FFI_DYNAMIC_LIB = define({
       /* RustCallStatus */ JsExternal,
     ],
   ) => void;
+  uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_update_model_parameters: (
+    args: [
+      /* ptr */ /* handle */ bigint,
+      /* model_parameters */ /* RustBuffer */ UniffiRustBufferStruct,
+      /* RustCallStatus */ JsExternal,
+    ],
+  ) => void;
   uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_update_stream_info: (
     args: [
       /* ptr */ /* handle */ bigint,
@@ -1419,6 +1452,13 @@ const FFI_DYNAMIC_LIB = define({
       /* RustCallStatus */ JsExternal,
     ],
   ) => void;
+  uniffi_plugins_ai_coustics_uniffi_fn_func_model_parameters_equal: (
+    args: [
+      /* a */ /* RustBuffer */ UniffiRustBufferStruct,
+      /* b */ /* RustBuffer */ UniffiRustBufferStruct,
+      /* RustCallStatus */ JsExternal,
+    ],
+  ) => number;
   ffi_plugins_ai_coustics_uniffi_rustbuffer_alloc: (
     args: [/* size */ bigint, /* RustCallStatus */ JsExternal],
   ) => /* RustBuffer */ UniffiRustBufferStruct;
@@ -1630,6 +1670,9 @@ const FFI_DYNAMIC_LIB = define({
   ffi_plugins_ai_coustics_uniffi_rust_future_complete_void: (
     args: [/* handle */ /* handle */ bigint, /* RustCallStatus */ JsExternal],
   ) => void;
+  uniffi_plugins_ai_coustics_uniffi_checksum_func_model_parameters_equal: (
+    args: [],
+  ) => number;
   uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_process: (
     args: [],
   ) => number;
@@ -1640,6 +1683,9 @@ const FFI_DYNAMIC_LIB = define({
     args: [],
   ) => number;
   uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_update_credentials: (
+    args: [],
+  ) => number;
+  uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_update_model_parameters: (
     args: [],
   ) => number;
   uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_update_stream_info: (

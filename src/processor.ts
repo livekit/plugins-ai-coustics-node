@@ -8,6 +8,7 @@ import { DataType, createPointer, restorePointer } from "ffi-rs";
 
 import {
   Enhancer,
+  modelParametersEqual,
   type StreamInfo,
   type Credentials,
   type NativeAudioBufferMut,
@@ -91,6 +92,29 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
   }
   setEnabled(enabled: boolean) {
     this.enabled = enabled;
+  }
+
+  /**
+   * Updates the model parameters on the running model.
+   *
+   * The native core must already exist (i.e. at least one audio frame must
+   * have been processed) for the update to take effect; otherwise the call
+   * is a no-op and a warning is logged. The new parameters are also stored
+   * so they are reapplied if the native core is later recreated (e.g. on a
+   * sample-rate or channel change).
+   */
+  updateModelParameters(modelParameters: ModelParameters) {
+    if (!this.filter) {
+      log.warn(
+        "update_model_parameters: Native core not yet initialized, skipping. Process at least one audio frame first.",
+      );
+      return;
+    }
+    if (modelParametersEqual(modelParameters, this.modelParameters)) {
+      return;
+    }
+    this.modelParameters = modelParameters;
+    this.filter.updateModelParameters(modelParameters);
   }
 
   onStreamInfoUpdated(info: FrameProcessorStreamInfo) {

@@ -688,6 +688,7 @@ export type EnhancerInterface = {
  * The model must always hold a set of valid credentials for continued operation.
 
  */ updateCredentials(credentials: Credentials): void;
+  updateModelParameters(modelParameters: ModelParameters): void;
 
   /**
    * Report information about the current audio stream being processed.
@@ -864,6 +865,33 @@ export class Enhancer
     );
   }
 
+  updateModelParameters(modelParameters: ModelParameters): void {
+    /* Regular function call: */
+    uniffiCaller.rustCallWithError(
+      /*liftError:*/ (buffer) => [
+        "EnhancerError",
+        FfiConverterTypeEnhancerError.lift(buffer),
+      ],
+      /*caller:*/ (callStatus) => {
+        let modelParametersArg = UniffiRustBufferValue.allocateWithBytes(
+          FfiConverterTypeModelParameters.lower(modelParameters),
+        ).toStruct();
+
+        const returnValue =
+          FFI_DYNAMIC_LIB.uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_update_model_parameters(
+            [
+              uniffiTypeEnhancerObjectFactory.clonePointer(this),
+              modelParametersArg,
+              callStatus,
+            ],
+          );
+
+        return returnValue;
+      },
+      /*liftString:*/ FfiConverterString.lift,
+    );
+  }
+
   /**
    * Report information about the current audio stream being processed.
    */ updateStreamInfo(info: StreamInfo): void {
@@ -994,3 +1022,30 @@ const FfiConverterTypeEnhancer = new FfiConverterObject(
 // ==========
 // Function definitions:
 // ==========
+
+export function modelParametersEqual(
+  a: ModelParameters,
+  b: ModelParameters,
+): boolean {
+  /* Regular function call: */
+  const returnValue = uniffiCaller.rustCall(
+    /*caller:*/ (callStatus) => {
+      let aArg = UniffiRustBufferValue.allocateWithBytes(
+        FfiConverterTypeModelParameters.lower(a),
+      ).toStruct();
+      let bArg = UniffiRustBufferValue.allocateWithBytes(
+        FfiConverterTypeModelParameters.lower(b),
+      ).toStruct();
+
+      const returnValue =
+        FFI_DYNAMIC_LIB.uniffi_plugins_ai_coustics_uniffi_fn_func_model_parameters_equal(
+          [aArg, bArg, callStatus],
+        );
+
+      return returnValue;
+    },
+    /*liftString:*/ FfiConverterString.lift,
+  );
+
+  return FfiConverterBool.lift(returnValue);
+}
