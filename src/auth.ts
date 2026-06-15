@@ -1,4 +1,4 @@
-import type { AuthMode, Credentials } from "./plugins-ai-coustics-uniffi-node";
+import { AuthMode, type Credentials } from "./generated";
 
 // Internal symbols - not exported, so they're inaccessible to consumers.
 export const toAuthMode = Symbol("lk.aic.node.toAuthMode");
@@ -26,13 +26,10 @@ function livekitCloud(): LiveKitCloudAuth {
       if (!credentials) {
         return null;
       }
-      return {
-        tag: "liveKitCloud",
-        inner: {
-          url: credentials.url,
-          token: credentials.token,
-        },
-      };
+      return new AuthMode.LiveKitCloud({
+        url: credentials.url,
+        token: credentials.token,
+      });
     },
   };
 }
@@ -43,7 +40,7 @@ function aiCousticsApi(licenseKey: string): AiCousticsApiAuth {
     provider: "aiCousticsApi",
     licenseKey,
     [toAuthMode]: (): AuthMode | null => {
-      return { tag: "aiCousticsApi", inner: { licenseKey } };
+      return new AuthMode.AiCousticsApi({ licenseKey });
     },
   };
 }

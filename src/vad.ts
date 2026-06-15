@@ -17,8 +17,8 @@ export class AICousticsVAD extends BaseVAD {
   label = "lk.ai-coustics-vad";
 
   constructor() {
-    super({
-      updateInterval: 20, // this isn't used but required to satisfy the base class constructor
+    super({ 
+      updateInterval: 20 // this isn't used but required to satisfy the base class constructor
     });
   }
 

@@ -4,54 +4,22 @@ import {
   type FrameProcessorStreamInfo,
   type FrameProcessorCredentials,
 } from "@livekit/rtc-node";
-import { DataType, createPointer, restorePointer } from "ffi-rs";
 
 import {
   Enhancer,
   modelParametersEqual,
+  EnhancerModel,
   type StreamInfo,
   type Credentials,
-  type NativeAudioBufferMut,
   type EnhancerSettings,
-  type EnhancerModel,
   type VadSettings,
   type ModelParameters,
-} from "./plugins-ai-coustics-uniffi-node";
+} from "./generated";
 import { log } from "./logger";
 import { type AuthBase, Auth, toAuthMode } from "./auth";
 
 /** The maximum size of a i16 */
 const MAX_SHORT_SIZE = 2 ** 15 - 1;
-
-/** Converts a Float32Array into a pointer and length, so it can be passed to the native rust module.
- *
- * The returned `ptr` is the raw address of the backing buffer's memory, obtained by
- * round-tripping through ffi-rs's `createPointer` / `restorePointer` helpers.
- */
-function toNativeAudioBufferMut(samples: Float32Array): NativeAudioBufferMut {
-  const samplesBuffer = Buffer.from(samples.buffer);
-  const sampleLength = samples.length;
-
-  // NOTE: `DataType.U8Array` is intentionally used rather than `DataType.FloatArray`. A Node
-  // `Buffer` is a `Uint8Array`, so ffi-rs hands us the true underlying data pointer without
-  // copying. `FloatArray` would refuse a `Float32Array` outright ("Object is not array") and,
-  // given a plain `number[]`, would allocate its own C-side copy - we'd lose the in-place
-  // mutations the rust side writes back. The bytes are the bytes; the u8 view is just how
-  // we ask ffi-rs to hand them off.
-  const external = createPointer({
-    paramsType: [DataType.U8Array],
-    paramsValue: [samplesBuffer],
-  });
-  const [baseAddress] = restorePointer({
-    retType: [DataType.BigInt],
-    paramsValue: external,
-  }) as unknown as [bigint];
-
-  return {
-    ptr: baseAddress,
-    len: BigInt(sampleLength), // NOTE: len is number of elements in array, NOT number of bytes!
-  };
-}
 
 /** Attribute used to store associated VAD data (the return value of
  * https://docs.rs/aic-sdk/latest/aic_sdk/struct.Vad.html#method.is_speech_detected) from aic
@@ -80,7 +48,7 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
 
   constructor(params: AiCousticsAudioEnhancerParams = {}) {
     super();
-    this.model = params.model ?? "quailL";
+    this.model = params.model ?? EnhancerModel.QuailL;
     this.vadSettings = params.vadSettings ?? {};
     this.modelParameters = params.modelParameters ?? {};
     this.auth = params.auth ?? Auth.livekitCloud();
@@ -105,9 +73,7 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
    */
   updateModelParameters(modelParameters: ModelParameters) {
     if (!this.filter) {
-      log.warn(
-        "update_model_parameters: Native core not yet initialized, skipping. Process at least one audio frame first.",
-      );
+      log.warn("update_model_parameters: Native core not yet initialized, skipping. Process at least one audio frame first.");
       return;
     }
     if (modelParametersEqual(modelParameters, this.modelParameters)) {
@@ -186,11 +152,11 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
       try {
         this.filter = new Enhancer(authMode, this.filterSettings);
       } catch (err) {
-        this.logProcessFrameError(
-          this.auth.provider === "aiCousticsApi"
-            ? `Failed to initialize plugin core: ${err}. Is your ai-coustics api key correct? Disabling noise cancellation for all following audio frames.`
-            : `Failed to initialize plugin core: ${err}. Disabling noise cancellation for all following audio frames.`,
-        );
+        this.logProcessFrameError(this.auth.provider === "aiCousticsApi" ? (
+          `Failed to initialize plugin core: ${err}. Is your ai-coustics api key correct? Disabling noise cancellation for all following audio frames.`
+        ) : (
+          `Failed to initialize plugin core: ${err}. Disabling noise cancellation for all following audio frames.`
+        ));
         this.filter = null;
         this.enabled = false;
         return frame;
@@ -201,24 +167,24 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
     }
 
     const frameDataI16: Int16Array = frame.data;
-    const frameDataF32 = Float32Array.from(
+    const samples: number[] = Array.from(
       frameDataI16,
       (short) => short / MAX_SHORT_SIZE,
     );
 
-    const nativeAudioBufferMut = toNativeAudioBufferMut(frameDataF32);
-
     let vadData: boolean;
+    let processed: number[];
     try {
-      // NOTE: filter.process processes in place and modifies `frameDataF32`.
-      vadData = this.filter.processWithVad(nativeAudioBufferMut);
+      const result = this.filter.processOwnedWithVad(samples);
+      processed = result.frame;
+      vadData = result.vad;
     } catch (err) {
       this.logProcessFrameError(`Processing failed: ${err}`);
       return frame;
     }
 
     const outputFrameDataI16 = Int16Array.from(
-      frameDataF32,
+      processed,
       (float) => float * MAX_SHORT_SIZE,
     );
 

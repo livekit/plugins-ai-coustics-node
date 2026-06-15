@@ -1,9 +1,9 @@
 export {
-  type EnhancerModel,
+  EnhancerModel,
   type VadSettings,
   type Credentials,
   type StreamInfo,
-} from "./plugins-ai-coustics-uniffi-node";
+} from "./generated";
 
 export { vad } from "./vad";
 export * from "./processor";
