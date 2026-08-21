@@ -8,6 +8,22 @@ allowBuilds:
   '@ffmpeg-installer/linux-arm': false
   '@ffmpeg-installer/linux-arm64': false
   '@ffmpeg-installer/darwin-arm64': false
+  '@livekit/local-inference': false
   esbuild: false
   protobufjs: false
   sharp: false
+
+# Don't re-verify deps before `pnpm run`.
+#
+# This package's per-arch optionalDependencies are pinned to its own version, so they only
+# exist on the registry once that version is published. Every pre-publish install therefore
+# resolves without them, which leaves the lockfile legitimately "missing" 5 dependencies that
+# package.json declares. pnpm 11 runs a frozen-lockfile check automatically before
+# `pnpm run <script>`, so that mismatch fails the build with ERR_PNPM_OUTDATED_LOCKFILE --
+# it broke both the pre-publish artifact check in ci.yml and `prepublishOnly` in release.yml.
+#
+# Turning the check off is safe here: this directory is generated from a Tera template and
+# ships no committed lockfile, so there is no drift for the check to catch. The parent
+# workspace at target/packages/ keeps its own check, and resolves the per-arch siblings
+# locally via linkWorkspacePackages.
+verifyDepsBeforeRun: false

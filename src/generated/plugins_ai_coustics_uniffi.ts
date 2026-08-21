@@ -16,10 +16,10 @@ import {
   type UniffiHandle,
   type UniffiObjectFactory,
   AbstractFfiConverterByteArray,
+  Cursor,
   FfiConverterArray,
   FfiConverterBool,
   FfiConverterFloat32,
-  FfiConverterInt32,
   FfiConverterObject,
   FfiConverterOptional,
   FfiConverterUInt16,
@@ -120,15 +120,15 @@ export const Credentials = (() => {
 const FfiConverterTypeCredentials = (() => {
   type TypeName = Credentials;
   class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    read(from: RustBuffer): TypeName {
+    readFromCursor(c: Cursor): TypeName {
       return {
-        url: FfiConverterString.read(from),
-        token: FfiConverterString.read(from),
+        url: FfiConverterString.readFromCursor(c),
+        token: FfiConverterString.readFromCursor(c),
       };
     }
-    write(value: TypeName, into: RustBuffer): void {
-      FfiConverterString.write(value.url, into);
-      FfiConverterString.write(value.token, into);
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterString.writeIntoCursor(value.url, c);
+      FfiConverterString.writeIntoCursor(value.token, c);
     }
     allocationSize(value: TypeName): number {
       return (
@@ -149,11 +149,10 @@ export enum EnhancerModel {
 }
 
 const FfiConverterTypeEnhancerModel = (() => {
-  const ordinalConverter = FfiConverterInt32;
   type TypeName = EnhancerModel;
   class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    read(from: RustBuffer): TypeName {
-      switch (ordinalConverter.read(from)) {
+    readFromCursor(c: Cursor): TypeName {
+      switch (c.readI32()) {
         case 1:
           return EnhancerModel.QuailL;
         case 2:
@@ -168,22 +167,22 @@ const FfiConverterTypeEnhancerModel = (() => {
           throw new UniffiInternalError.UnexpectedEnumCase();
       }
     }
-    write(value: TypeName, into: RustBuffer): void {
+    writeIntoCursor(value: TypeName, c: Cursor): void {
       switch (value) {
         case EnhancerModel.QuailL:
-          return ordinalConverter.write(1, into);
+          return c.writeI32(1);
         case EnhancerModel.QuailVfL:
-          return ordinalConverter.write(2, into);
+          return c.writeI32(2);
         case EnhancerModel.QuailVfS:
-          return ordinalConverter.write(3, into);
+          return c.writeI32(3);
         case EnhancerModel.SparrowS:
-          return ordinalConverter.write(4, into);
+          return c.writeI32(4);
         case EnhancerModel.RookS:
-          return ordinalConverter.write(5, into);
+          return c.writeI32(5);
       }
     }
     allocationSize(value: TypeName): number {
-      return ordinalConverter.allocationSize(0);
+      return 4;
     }
   }
   return new FFIConverter();
@@ -214,15 +213,15 @@ export const ModelParameters = (() => {
 const FfiConverterTypeModelParameters = (() => {
   type TypeName = ModelParameters;
   class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    read(from: RustBuffer): TypeName {
+    readFromCursor(c: Cursor): TypeName {
       return {
-        bypass: FfiConverterOptionalFloat32.read(from),
-        enhancementLevel: FfiConverterOptionalFloat32.read(from),
+        bypass: FfiConverterOptionalFloat32.readFromCursor(c),
+        enhancementLevel: FfiConverterOptionalFloat32.readFromCursor(c),
       };
     }
-    write(value: TypeName, into: RustBuffer): void {
-      FfiConverterOptionalFloat32.write(value.bypass, into);
-      FfiConverterOptionalFloat32.write(value.enhancementLevel, into);
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterOptionalFloat32.writeIntoCursor(value.bypass, c);
+      FfiConverterOptionalFloat32.writeIntoCursor(value.enhancementLevel, c);
     }
     allocationSize(value: TypeName): number {
       return (
@@ -260,17 +259,20 @@ export const VadSettings = (() => {
 const FfiConverterTypeVadSettings = (() => {
   type TypeName = VadSettings;
   class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    read(from: RustBuffer): TypeName {
+    readFromCursor(c: Cursor): TypeName {
       return {
-        speechHoldDuration: FfiConverterOptionalFloat32.read(from),
-        sensitivity: FfiConverterOptionalFloat32.read(from),
-        minimumSpeechDuration: FfiConverterOptionalFloat32.read(from),
+        speechHoldDuration: FfiConverterOptionalFloat32.readFromCursor(c),
+        sensitivity: FfiConverterOptionalFloat32.readFromCursor(c),
+        minimumSpeechDuration: FfiConverterOptionalFloat32.readFromCursor(c),
       };
     }
-    write(value: TypeName, into: RustBuffer): void {
-      FfiConverterOptionalFloat32.write(value.speechHoldDuration, into);
-      FfiConverterOptionalFloat32.write(value.sensitivity, into);
-      FfiConverterOptionalFloat32.write(value.minimumSpeechDuration, into);
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterOptionalFloat32.writeIntoCursor(value.speechHoldDuration, c);
+      FfiConverterOptionalFloat32.writeIntoCursor(value.sensitivity, c);
+      FfiConverterOptionalFloat32.writeIntoCursor(
+        value.minimumSpeechDuration,
+        c,
+      );
     }
     allocationSize(value: TypeName): number {
       return (
@@ -312,23 +314,23 @@ export const EnhancerSettings = (() => {
 const FfiConverterTypeEnhancerSettings = (() => {
   type TypeName = EnhancerSettings;
   class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    read(from: RustBuffer): TypeName {
+    readFromCursor(c: Cursor): TypeName {
       return {
-        sampleRate: FfiConverterUInt32.read(from),
-        numChannels: FfiConverterUInt16.read(from),
-        samplesPerChannel: FfiConverterUInt32.read(from),
-        model: FfiConverterTypeEnhancerModel.read(from),
-        modelParameters: FfiConverterTypeModelParameters.read(from),
-        vad: FfiConverterTypeVadSettings.read(from),
+        sampleRate: FfiConverterUInt32.readFromCursor(c),
+        numChannels: FfiConverterUInt16.readFromCursor(c),
+        samplesPerChannel: FfiConverterUInt32.readFromCursor(c),
+        model: FfiConverterTypeEnhancerModel.readFromCursor(c),
+        modelParameters: FfiConverterTypeModelParameters.readFromCursor(c),
+        vad: FfiConverterTypeVadSettings.readFromCursor(c),
       };
     }
-    write(value: TypeName, into: RustBuffer): void {
-      FfiConverterUInt32.write(value.sampleRate, into);
-      FfiConverterUInt16.write(value.numChannels, into);
-      FfiConverterUInt32.write(value.samplesPerChannel, into);
-      FfiConverterTypeEnhancerModel.write(value.model, into);
-      FfiConverterTypeModelParameters.write(value.modelParameters, into);
-      FfiConverterTypeVadSettings.write(value.vad, into);
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterUInt32.writeIntoCursor(value.sampleRate, c);
+      FfiConverterUInt16.writeIntoCursor(value.numChannels, c);
+      FfiConverterUInt32.writeIntoCursor(value.samplesPerChannel, c);
+      FfiConverterTypeEnhancerModel.writeIntoCursor(value.model, c);
+      FfiConverterTypeModelParameters.writeIntoCursor(value.modelParameters, c);
+      FfiConverterTypeVadSettings.writeIntoCursor(value.vad, c);
     }
     allocationSize(value: TypeName): number {
       return (
@@ -379,15 +381,15 @@ export const NativeAudioBufferMut = (() => {
 const FfiConverterTypeNativeAudioBufferMut = (() => {
   type TypeName = NativeAudioBufferMut;
   class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    read(from: RustBuffer): TypeName {
+    readFromCursor(c: Cursor): TypeName {
       return {
-        ptr: FfiConverterUInt64.read(from),
-        len: FfiConverterUInt64.read(from),
+        ptr: FfiConverterUInt64.readFromCursor(c),
+        len: FfiConverterUInt64.readFromCursor(c),
       };
     }
-    write(value: TypeName, into: RustBuffer): void {
-      FfiConverterUInt64.write(value.ptr, into);
-      FfiConverterUInt64.write(value.len, into);
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterUInt64.writeIntoCursor(value.ptr, c);
+      FfiConverterUInt64.writeIntoCursor(value.len, c);
     }
     allocationSize(value: TypeName): number {
       return (
@@ -427,15 +429,15 @@ export const ProcessVadResult = (() => {
 const FfiConverterTypeProcessVadResult = (() => {
   type TypeName = ProcessVadResult;
   class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    read(from: RustBuffer): TypeName {
+    readFromCursor(c: Cursor): TypeName {
       return {
-        frame: FfiConverterSequenceFloat32.read(from),
-        vad: FfiConverterBool.read(from),
+        frame: FfiConverterSequenceFloat32.readFromCursor(c),
+        vad: FfiConverterBool.readFromCursor(c),
       };
     }
-    write(value: TypeName, into: RustBuffer): void {
-      FfiConverterSequenceFloat32.write(value.frame, into);
-      FfiConverterBool.write(value.vad, into);
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterSequenceFloat32.writeIntoCursor(value.frame, c);
+      FfiConverterBool.writeIntoCursor(value.vad, c);
     }
     allocationSize(value: TypeName): number {
       return (
@@ -475,21 +477,21 @@ export const StreamInfo = (() => {
 const FfiConverterTypeStreamInfo = (() => {
   type TypeName = StreamInfo;
   class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    read(from: RustBuffer): TypeName {
+    readFromCursor(c: Cursor): TypeName {
       return {
-        roomId: FfiConverterString.read(from),
-        roomName: FfiConverterString.read(from),
-        participantIdentity: FfiConverterString.read(from),
-        participantId: FfiConverterString.read(from),
-        trackId: FfiConverterString.read(from),
+        roomId: FfiConverterString.readFromCursor(c),
+        roomName: FfiConverterString.readFromCursor(c),
+        participantIdentity: FfiConverterString.readFromCursor(c),
+        participantId: FfiConverterString.readFromCursor(c),
+        trackId: FfiConverterString.readFromCursor(c),
       };
     }
-    write(value: TypeName, into: RustBuffer): void {
-      FfiConverterString.write(value.roomId, into);
-      FfiConverterString.write(value.roomName, into);
-      FfiConverterString.write(value.participantIdentity, into);
-      FfiConverterString.write(value.participantId, into);
-      FfiConverterString.write(value.trackId, into);
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterString.writeIntoCursor(value.roomId, c);
+      FfiConverterString.writeIntoCursor(value.roomName, c);
+      FfiConverterString.writeIntoCursor(value.participantIdentity, c);
+      FfiConverterString.writeIntoCursor(value.participantId, c);
+      FfiConverterString.writeIntoCursor(value.trackId, c);
     }
     allocationSize(value: TypeName): number {
       return (
@@ -590,37 +592,36 @@ export type AuthMode = InstanceType<
 
 // FfiConverter for enum AuthMode
 const FfiConverterTypeAuthMode = (() => {
-  const ordinalConverter = FfiConverterInt32;
   type TypeName = AuthMode;
   class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    read(from: RustBuffer): TypeName {
-      switch (ordinalConverter.read(from)) {
+    readFromCursor(c: Cursor): TypeName {
+      switch (c.readI32()) {
         case 1:
           return new AuthMode.LiveKitCloud({
-            url: FfiConverterString.read(from),
-            token: FfiConverterString.read(from),
+            url: FfiConverterString.readFromCursor(c),
+            token: FfiConverterString.readFromCursor(c),
           });
         case 2:
           return new AuthMode.AiCousticsApi({
-            licenseKey: FfiConverterString.read(from),
+            licenseKey: FfiConverterString.readFromCursor(c),
           });
         default:
           throw new UniffiInternalError.UnexpectedEnumCase();
       }
     }
-    write(value: TypeName, into: RustBuffer): void {
+    writeIntoCursor(value: TypeName, c: Cursor): void {
       switch (value.tag) {
         case AuthMode_Tags.LiveKitCloud: {
-          ordinalConverter.write(1, into);
+          c.writeI32(1);
           const inner = value.inner;
-          FfiConverterString.write(inner.url, into);
-          FfiConverterString.write(inner.token, into);
+          FfiConverterString.writeIntoCursor(inner.url, c);
+          FfiConverterString.writeIntoCursor(inner.token, c);
           return;
         }
         case AuthMode_Tags.AiCousticsApi: {
-          ordinalConverter.write(2, into);
+          c.writeI32(2);
           const inner = value.inner;
-          FfiConverterString.write(inner.licenseKey, into);
+          FfiConverterString.writeIntoCursor(inner.licenseKey, c);
           return;
         }
         default:
@@ -632,14 +633,14 @@ const FfiConverterTypeAuthMode = (() => {
       switch (value.tag) {
         case AuthMode_Tags.LiveKitCloud: {
           const inner = value.inner;
-          let size = ordinalConverter.allocationSize(1);
+          let size = 4;
           size += FfiConverterString.allocationSize(inner.url);
           size += FfiConverterString.allocationSize(inner.token);
           return size;
         }
         case AuthMode_Tags.AiCousticsApi: {
           const inner = value.inner;
-          let size = ordinalConverter.allocationSize(2);
+          let size = 4;
           size += FfiConverterString.allocationSize(inner.licenseKey);
           return size;
         }
@@ -719,28 +720,29 @@ export type EnhancerError = InstanceType<
 >;
 
 const FfiConverterTypeEnhancerError = (() => {
-  const intConverter = FfiConverterInt32;
   type TypeName = EnhancerError;
   class FfiConverter extends AbstractFfiConverterByteArray<TypeName> {
-    read(from: RustBuffer): TypeName {
-      switch (intConverter.read(from)) {
+    readFromCursor(c: Cursor): TypeName {
+      switch (c.readI32()) {
         case 1:
-          return new EnhancerError.Model(FfiConverterString.read(from));
+          return new EnhancerError.Model(FfiConverterString.readFromCursor(c));
 
         case 2:
-          return new EnhancerError.Authorization(FfiConverterString.read(from));
+          return new EnhancerError.Authorization(
+            FfiConverterString.readFromCursor(c),
+          );
 
         default:
           throw new UniffiInternalError.UnexpectedEnumCase();
       }
     }
-    write(value: TypeName, into: RustBuffer): void {
+    writeIntoCursor(value: TypeName, c: Cursor): void {
       const obj = value as any;
       const index = obj[variantOrdinalSymbol] as number;
-      intConverter.write(index, into);
+      c.writeI32(index);
     }
     allocationSize(value: TypeName): number {
-      return intConverter.allocationSize(0);
+      return 4;
     }
   }
   return new FfiConverter();
@@ -861,30 +863,27 @@ export class Enhancer extends UniffiAbstractObject implements EnhancerLike {
    * extracting a TypedArray's underlying pointer; otherwise prefer [`Self::process`].
    */
   processOwned(frame: Array<number>): Array<number> /*throws*/ {
-    return ((__rb: Uint8Array) => {
-      try {
-        return FfiConverterSequenceFloat32.lift(__rb);
-      } finally {
-        nativeModule().rustbuffer_free(__rb);
-      }
-    })(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeEnhancerError.lift.bind(
-          FfiConverterTypeEnhancerError,
-        ),
-        /*caller:*/ (callStatus) => {
-          return nativeModule().uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_process_owned(
-            uniffiTypeEnhancerObjectFactory.clonePointer(this),
-            FfiConverterSequenceFloat32.lower(
-              frame,
-              nativeModule().rustbuffer_alloc,
-            ),
-            callStatus,
-          );
-        },
-        /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString),
+    const __rb: Uint8Array = uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeEnhancerError.lift.bind(
+        FfiConverterTypeEnhancerError,
       ),
+      /*caller:*/ (callStatus) => {
+        return nativeModule().uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_process_owned(
+          uniffiTypeEnhancerObjectFactory.clonePointer(this),
+          FfiConverterSequenceFloat32.lower(
+            frame,
+            nativeModule().rustbuffer_alloc,
+          ),
+          callStatus,
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString),
     );
+    try {
+      return FfiConverterSequenceFloat32.lift(__rb);
+    } finally {
+      nativeModule().rustbuffer_free(__rb);
+    }
   }
 
   /**
@@ -893,60 +892,54 @@ export class Enhancer extends UniffiAbstractObject implements EnhancerLike {
   processOwnedPlanar(
     channels: Array<Array<number>>,
   ): Array<Array<number>> /*throws*/ {
-    return ((__rb: Uint8Array) => {
-      try {
-        return FfiConverterSequenceSequenceFloat32.lift(__rb);
-      } finally {
-        nativeModule().rustbuffer_free(__rb);
-      }
-    })(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeEnhancerError.lift.bind(
-          FfiConverterTypeEnhancerError,
-        ),
-        /*caller:*/ (callStatus) => {
-          return nativeModule().uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_process_owned_planar(
-            uniffiTypeEnhancerObjectFactory.clonePointer(this),
-            FfiConverterSequenceSequenceFloat32.lower(
-              channels,
-              nativeModule().rustbuffer_alloc,
-            ),
-            callStatus,
-          );
-        },
-        /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString),
+    const __rb: Uint8Array = uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeEnhancerError.lift.bind(
+        FfiConverterTypeEnhancerError,
       ),
+      /*caller:*/ (callStatus) => {
+        return nativeModule().uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_process_owned_planar(
+          uniffiTypeEnhancerObjectFactory.clonePointer(this),
+          FfiConverterSequenceSequenceFloat32.lower(
+            channels,
+            nativeModule().rustbuffer_alloc,
+          ),
+          callStatus,
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString),
     );
+    try {
+      return FfiConverterSequenceSequenceFloat32.lift(__rb);
+    } finally {
+      nativeModule().rustbuffer_free(__rb);
+    }
   }
 
   /**
    * Process an interleaved, 10ms frame. Heap-copy + VAD flag; see [`Self::process_owned`].
    */
   processOwnedWithVad(frame: Array<number>): ProcessVadResult /*throws*/ {
-    return ((__rb: Uint8Array) => {
-      try {
-        return FfiConverterTypeProcessVadResult.lift(__rb);
-      } finally {
-        nativeModule().rustbuffer_free(__rb);
-      }
-    })(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeEnhancerError.lift.bind(
-          FfiConverterTypeEnhancerError,
-        ),
-        /*caller:*/ (callStatus) => {
-          return nativeModule().uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_process_owned_with_vad(
-            uniffiTypeEnhancerObjectFactory.clonePointer(this),
-            FfiConverterSequenceFloat32.lower(
-              frame,
-              nativeModule().rustbuffer_alloc,
-            ),
-            callStatus,
-          );
-        },
-        /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString),
+    const __rb: Uint8Array = uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeEnhancerError.lift.bind(
+        FfiConverterTypeEnhancerError,
       ),
+      /*caller:*/ (callStatus) => {
+        return nativeModule().uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_process_owned_with_vad(
+          uniffiTypeEnhancerObjectFactory.clonePointer(this),
+          FfiConverterSequenceFloat32.lower(
+            frame,
+            nativeModule().rustbuffer_alloc,
+          ),
+          callStatus,
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString),
     );
+    try {
+      return FfiConverterTypeProcessVadResult.lift(__rb);
+    } finally {
+      nativeModule().rustbuffer_free(__rb);
+    }
   }
 
   /**

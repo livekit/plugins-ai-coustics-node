@@ -3,7 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
-
 import lib from "@ubjs/node";
 const { UniffiNativeModule, FfiType, resolveLibPath } = lib;
 
@@ -684,7 +683,6 @@ interface NativeModuleInterface {
   rustbuffer_alloc(n: number): Uint8Array;
   rustbuffer_free(view: Uint8Array): void;
 }
-
 let _nativeModule: NativeModuleInterface | undefined;
 const getter: () => NativeModuleInterface = () => {
   if (!_nativeModule) {
