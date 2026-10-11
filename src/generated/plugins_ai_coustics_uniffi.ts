@@ -763,19 +763,9 @@ export interface EnhancerLike {
    */
   processOwned(frame: Array<number>) /*throws*/ : Array<number>;
   /**
-   * Process a planar, 10ms frame. Heap-copy; see [`Self::process_owned`].
-   */
-  processOwnedPlanar(
-    channels: Array<Array<number>>,
-  ) /*throws*/ : Array<Array<number>>;
-  /**
    * Process an interleaved, 10ms frame. Heap-copy + VAD flag; see [`Self::process_owned`].
    */
   processOwnedWithVad(frame: Array<number>) /*throws*/ : ProcessVadResult;
-  /**
-   * Process a planar, 10ms frame. Zero-copy; see [`Self::process`].
-   */
-  processPlanar(channels: Array<NativeAudioBufferMut>) /*throws*/ : void;
   /**
    * Process an interleaved, 10ms frame. Zero-copy + VAD flag; see [`Self::process`].
    */
@@ -887,35 +877,6 @@ export class Enhancer extends UniffiAbstractObject implements EnhancerLike {
   }
 
   /**
-   * Process a planar, 10ms frame. Heap-copy; see [`Self::process_owned`].
-   */
-  processOwnedPlanar(
-    channels: Array<Array<number>>,
-  ): Array<Array<number>> /*throws*/ {
-    const __rb: Uint8Array = uniffiCaller.rustCallWithError(
-      /*liftError:*/ FfiConverterTypeEnhancerError.lift.bind(
-        FfiConverterTypeEnhancerError,
-      ),
-      /*caller:*/ (callStatus) => {
-        return nativeModule().uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_process_owned_planar(
-          uniffiTypeEnhancerObjectFactory.clonePointer(this),
-          FfiConverterSequenceSequenceFloat32.lower(
-            channels,
-            nativeModule().rustbuffer_alloc,
-          ),
-          callStatus,
-        );
-      },
-      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString),
-    );
-    try {
-      return FfiConverterSequenceSequenceFloat32.lift(__rb);
-    } finally {
-      nativeModule().rustbuffer_free(__rb);
-    }
-  }
-
-  /**
    * Process an interleaved, 10ms frame. Heap-copy + VAD flag; see [`Self::process_owned`].
    */
   processOwnedWithVad(frame: Array<number>): ProcessVadResult /*throws*/ {
@@ -940,28 +901,6 @@ export class Enhancer extends UniffiAbstractObject implements EnhancerLike {
     } finally {
       nativeModule().rustbuffer_free(__rb);
     }
-  }
-
-  /**
-   * Process a planar, 10ms frame. Zero-copy; see [`Self::process`].
-   */
-  processPlanar(channels: Array<NativeAudioBufferMut>): void /*throws*/ {
-    uniffiCaller.rustCallWithError(
-      /*liftError:*/ FfiConverterTypeEnhancerError.lift.bind(
-        FfiConverterTypeEnhancerError,
-      ),
-      /*caller:*/ (callStatus) => {
-        nativeModule().uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_process_planar(
-          uniffiTypeEnhancerObjectFactory.clonePointer(this),
-          FfiConverterSequenceTypeNativeAudioBufferMut.lower(
-            channels,
-            nativeModule().rustbuffer_alloc,
-          ),
-          callStatus,
-        );
-      },
-      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString),
-    );
   }
 
   /**
@@ -1152,16 +1091,6 @@ const FfiConverterOptionalFloat32 = new FfiConverterOptional(
 // FfiConverter for Array<number>
 const FfiConverterSequenceFloat32 = new FfiConverterArray(FfiConverterFloat32);
 
-// FfiConverter for Array<Array<number>>
-const FfiConverterSequenceSequenceFloat32 = new FfiConverterArray(
-  FfiConverterSequenceFloat32,
-);
-
-// FfiConverter for Array<NativeAudioBufferMut>
-const FfiConverterSequenceTypeNativeAudioBufferMut = new FfiConverterArray(
-  FfiConverterTypeNativeAudioBufferMut,
-);
-
 /**
  * This should be called before anything else.
  *
@@ -1217,27 +1146,11 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
-    nativeModule().uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_process_owned_planar() !==
-    54753
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      "uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_process_owned_planar",
-    );
-  }
-  if (
     nativeModule().uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_process_owned_with_vad() !==
     23938
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_process_owned_with_vad",
-    );
-  }
-  if (
-    nativeModule().uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_process_planar() !==
-    60430
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      "uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_process_planar",
     );
   }
   if (

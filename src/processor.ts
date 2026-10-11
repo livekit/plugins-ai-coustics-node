@@ -22,12 +22,61 @@ import { type AuthBase, Auth, toAuthMode } from "./auth";
 const MAX_SHORT_SIZE = 2 ** 15 - 1;
 
 /** Attribute used to store associated VAD data (the return value of
- * https://docs.rs/aic-sdk/latest/aic_sdk/struct.Vad.html#method.is_speech_detected) from aic
+ * https://docs.rs/aic-sdk/latest/aic_sdk/struct.EnergyVadContext.html#method.is_speech_detected) from aic
  * model into processed `AudioFrame`s. */
 export const FRAME_USERDATA_AIC_VAD_ATTRIBUTE = "lk.aic-vad";
 
+/**
+ * The string form of an {@link EnhancerModel}, accepted anywhere a model can be specified.
+ *
+ * Before 0.3.0 `EnhancerModel` was this string union rather than an enum; both spellings are
+ * supported so code written against either version keeps working.
+ */
+export type EnhancerModelName =
+  | "quailL"
+  | "quailVfL"
+  | "quailVfS"
+  | "sparrowS"
+  | "rookS";
+
+/** A model specified either as an {@link EnhancerModel} member or as its {@link EnhancerModelName}. */
+export type EnhancerModelLike = EnhancerModel | EnhancerModelName;
+
+const ENHANCER_MODELS_BY_NAME = {
+  quailL: EnhancerModel.QuailL,
+  quailVfL: EnhancerModel.QuailVfL,
+  quailVfS: EnhancerModel.QuailVfS,
+  sparrowS: EnhancerModel.SparrowS,
+  rookS: EnhancerModel.RookS,
+} as const satisfies Record<EnhancerModelName, EnhancerModel>;
+
+/**
+ * Resolves either spelling of a model into the {@link EnhancerModel} member the generated
+ * bindings expect.
+ *
+ * Validating here matters most for plain JavaScript callers: the generated FfiConverter's write
+ * path has no default branch, so a value matching none of the enum members writes nothing while
+ * `allocationSize` still reserves its four bytes - a silently malformed payload across the FFI
+ * boundary rather than an error at the call site.
+ */
+function toEnhancerModel(model: EnhancerModelLike): EnhancerModel {
+  const resolved =
+    typeof model === "string"
+      ? ENHANCER_MODELS_BY_NAME[model as EnhancerModelName]
+      : model;
+  if (
+    typeof resolved === "undefined" ||
+    typeof EnhancerModel[resolved] === "undefined"
+  ) {
+    throw new TypeError(
+      `Unknown ai-coustics enhancer model ${JSON.stringify(model)}: expected an EnhancerModel member, or one of ${Object.keys(ENHANCER_MODELS_BY_NAME).join(", ")}.`,
+    );
+  }
+  return resolved;
+}
+
 type AiCousticsAudioEnhancerParams = {
-  model?: EnhancerModel;
+  model?: EnhancerModelLike;
   vadSettings?: VadSettings;
   modelParameters?: ModelParameters;
   auth?: AuthBase;
@@ -48,7 +97,7 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
 
   constructor(params: AiCousticsAudioEnhancerParams = {}) {
     super();
-    this.model = params.model ?? EnhancerModel.QuailL;
+    this.model = toEnhancerModel(params.model ?? EnhancerModel.QuailL);
     this.vadSettings = params.vadSettings ?? {};
     this.modelParameters = params.modelParameters ?? {};
     this.auth = params.auth ?? Auth.livekitCloud();
@@ -245,13 +294,15 @@ class AiCousticsAudioEnhancer extends FrameProcessor<AudioFrame> {
 
 export type AudioEnhancementParams = AiCousticsAudioEnhancerParams;
 
-type DeprecatedModels = "sparrowS";
+// Both spellings have to be listed: `EnhancerModel` is a numeric enum, so excluding only the
+// string name would filter nothing out of the union (and vice versa).
+type DeprecatedModels = EnhancerModel.SparrowS | "sparrowS";
 
 type NonDeprecatedAudioEnhancementParams = Omit<
   AudioEnhancementParams,
   "model"
 > & {
-  model?: Exclude<EnhancerModel, DeprecatedModels>;
+  model?: Exclude<EnhancerModelLike, DeprecatedModels>;
 };
 
 /**

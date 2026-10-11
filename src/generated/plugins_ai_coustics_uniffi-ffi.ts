@@ -341,22 +341,12 @@ const DEFINITIONS = {
       ret: FfiType.RustBuffer,
       hasRustCallStatus: true,
     },
-    uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_process_owned_planar: {
-      args: [FfiType.Handle, FfiType.RustBuffer],
-      ret: FfiType.RustBuffer,
-      hasRustCallStatus: true,
-    },
     uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_process_owned_with_vad:
       {
         args: [FfiType.Handle, FfiType.RustBuffer],
         ret: FfiType.RustBuffer,
         hasRustCallStatus: true,
       },
-    uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_process_planar: {
-      args: [FfiType.Handle, FfiType.RustBuffer],
-      ret: FfiType.Void,
-      hasRustCallStatus: true,
-    },
     uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_process_with_vad: {
       args: [FfiType.Handle, FfiType.RustBuffer],
       ret: FfiType.Int8,
@@ -403,23 +393,12 @@ const DEFINITIONS = {
       ret: FfiType.UInt16,
       hasRustCallStatus: false,
     },
-    uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_process_owned_planar:
-      {
-        args: [],
-        ret: FfiType.UInt16,
-        hasRustCallStatus: false,
-      },
     uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_process_owned_with_vad:
       {
         args: [],
         ret: FfiType.UInt16,
         hasRustCallStatus: false,
       },
-    uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_process_planar: {
-      args: [],
-      ret: FfiType.UInt16,
-      hasRustCallStatus: false,
-    },
     uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_process_with_vad:
       {
         args: [],
@@ -630,21 +609,11 @@ interface NativeModuleInterface {
     frame: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus,
   ): Uint8Array;
-  uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_process_owned_planar(
-    uniffiSelf: bigint,
-    channels: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus,
-  ): Uint8Array;
   uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_process_owned_with_vad(
     uniffiSelf: bigint,
     frame: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus,
   ): Uint8Array;
-  uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_process_planar(
-    uniffiSelf: bigint,
-    channels: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus,
-  ): void;
   uniffi_plugins_ai_coustics_uniffi_fn_method_enhancer_process_with_vad(
     uniffiSelf: bigint,
     frame: Uint8Array,
@@ -670,9 +639,7 @@ interface NativeModuleInterface {
   uniffi_plugins_ai_coustics_uniffi_checksum_constructor_enhancer_new(): number;
   uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_process(): number;
   uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_process_owned(): number;
-  uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_process_owned_planar(): number;
   uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_process_owned_with_vad(): number;
-  uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_process_planar(): number;
   uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_process_with_vad(): number;
   uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_update_credentials(): number;
   uniffi_plugins_ai_coustics_uniffi_checksum_method_enhancer_update_model_parameters(): number;
