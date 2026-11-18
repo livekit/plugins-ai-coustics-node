@@ -8,6 +8,7 @@ allowBuilds:
   '@ffmpeg-installer/linux-arm': false
   '@ffmpeg-installer/linux-arm64': false
   '@ffmpeg-installer/darwin-arm64': false
+  '@livekit/blingfire': false
   '@livekit/local-inference': false
   esbuild: false
   protobufjs: false
